@@ -164,6 +164,16 @@ template <typename Impl, int Init>
 struct state_machine {
     virtual ~state_machine() {}
 
+    template <typename E, typename T>
+    int transit_int( const T& e_ ) {
+        const E& e = ( const E& )e_;
+        return transit( e );
+    }
+
+    // template <typename E>
+    // int transit_int( const E& e_ ) {
+    // }
+
     template <typename E>
     int transit( const E& e_ ) {
         using filted      = __meta_call( yy::details::filter<typename Impl::__transitions, yy::details::dispatcher_filter<E>::template result> );

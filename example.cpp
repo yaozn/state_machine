@@ -52,11 +52,10 @@ enum Evt {
 };
 */
 
-struct put {};
-struct paied {};
-struct packed {};
-
 struct event {};
+struct put : event {};
+struct paied : event {};
+struct packed : event {};
 struct cont : event {};
 
 struct order_processor : yy::state_machine<order_processor, st::init> {
@@ -71,12 +70,12 @@ struct order_processor : yy::state_machine<order_processor, st::init> {
     }
 
     //-action handlers
-    void do_pay( int state_, const put& evt_ ) { std::cout << "do pay" << std::endl; }
+    void do_pay( int state_, const event& evt_ ) { std::cout << "do pay" << std::endl; }
     void do_pack( int state_, const paied& evt_ ) { std::cout << "do pack" << std::endl; }
     void do_reload( int state_, const cont& evt_ ) { std::cout << "do reload" << std::endl; }
 
     //-transition table
-    TRANSITIONS( _T( st::init, put, st::payment, &order_processor::do_pay ),
+    TRANSITIONS( _T( st::init, event, st::payment, &order_processor::do_pay ),
                  _T( st::payment, paied, st::packing ),  //!! will use default
                  _T( st::shipped, cont, st::init, &order_processor::do_reload ) );
 };
@@ -86,7 +85,8 @@ int main() {
     order_processor op;
 
     auto trans = 0;
-    trans      = op.transit( put() );
+    trans      = op.transit<event>( put() );
+
     assert( trans == st::payment );  // call do pay
     trans = op.transit( paied() );
     assert( trans == st::packing );  // call defaultg
